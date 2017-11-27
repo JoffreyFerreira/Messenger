@@ -1,7 +1,7 @@
 
 OBJ1 = fon.o client.o
 OBJ2 = fon.o serveur.o
-OPTIONS	=
+OPTIONS	= -DDEBUG
 # Adaptation a Darwin / MacOS X avec fink
 # Du fait de l'absence de libtermcap on se fait pas mal
 # cracher dessus mais ca marche...

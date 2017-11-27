@@ -70,7 +70,7 @@ int num_socket = h_socket(AF_INET,SOCK_STREAM);
 struct sockaddr_in *padr_distante;
 adr_socket (service,serveur,SOCK_STREAM,&padr_distante);
 h_connect(num_socket,padr_distante);
-
+printf("Connecté !\n");
 int gagne=0;
 while (gagne!=1) {
 }

@@ -80,7 +80,6 @@ int compare_cmd(char *cmd, char *client, int n, int *bien_place, int *mal_place)
 void serveur_appli(char *service)
 
 /* Procedure correspondant au traitemnt du serveur de votre application */
-
 {
 	char *cmd_quit = "quit";
 	int num_socket = h_socket(AF_INET,SOCK_STREAM);
@@ -89,8 +88,12 @@ void serveur_appli(char *service)
 	h_bind(num_socket,padr_locale);
 	h_listen(num_socket,1);
 	int num_socket_client = h_accept(num_socket,TOUT_CLIENT);
-	h_close(num_socket_client);
-	h_close(num_socket);
+	printf("Connecté !\n");
+	while (1) {
+		
+	}
+/*	h_close(num_socket_client);
+	h_close(num_socket);*/
 }
 
 /* fin des echanges avec le client */
