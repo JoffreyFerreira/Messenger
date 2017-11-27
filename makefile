@@ -1,6 +1,6 @@
 
-OBJ1 = fon.o client.o
-OBJ2 = fon.o serveur.o
+OBJ1 = client.o
+OBJ2 = serveur.o
 OPTIONS	= -DDEBUG
 # Adaptation a Darwin / MacOS X avec fink
 # Du fait de l'absence de libtermcap on se fait pas mal
@@ -33,20 +33,16 @@ EXEC = ${OBJ1} client ${OBJ2} serveur
 all: ${EXEC}
 
 
-fon.o :  fon.h fon.c
-	#gcc -DDEBUG -c fon.c
-	gcc -c fon.c
-
-client.o : fon.h	client.c
+client.o : client.c
 	gcc  $(CFLAGS) -c  client.c
 
-serveur.o : fon.h	serveur.c
+serveur.o :	serveur.c
 	gcc  $(CFLAGS) -c  serveur.c
 
-client : ${OBJ1}
+tchat-client : ${OBJ1}
 	gcc $(LFLAGS) ${OBJ1} -o client -lcurses   $(OPTIONS)
 
-serveur : ${OBJ2}
+tchat-server : ${OBJ2}
 	gcc $(LFLAGS) ${OBJ2} -o serveur -lcurses   $(OPTIONS)
 
 
