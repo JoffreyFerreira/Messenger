@@ -11,17 +11,32 @@
 /*									      */
 /******************************************************************************/
 
-#include<stdio.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
 #include <curses.h>
+#include <time.h>
+#include <string.h>
 
-#include<sys/signal.h>
-#include<sys/wait.h>
-#include<stdlib.h>
-#include<time.h>
+#include <unistd.h>
 
-#include "fon.h"     		/* Primitives de la boite a outils */
+#include <arpa/inet.h>
+
+#include <sys/signal.h>
+#include <sys/wait.h>
+#include <sys/socket.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <netdb.h>
+
+
 
 #define SERVICE_DEFAUT "1111"
+#define PORT 1234
 
 void serveur_appli (char *service);   /* programme serveur */
 
@@ -40,15 +55,15 @@ int main(int argc,char *argv[])
 	switch (argc)
 	{
 		case 1:
-		printf("defaut service = %s\n", service);
-		break;
+			printf("defaut service = %s\n", service);
+			break;
 		case 2:
-		service=argv[1];
-		break;
+			service=argv[1];
+			break;
 
 		default :
-		printf("Usage:serveur service (nom ou port) \n");
-		exit(1);
+			printf("Usage:serveur service (nom ou port) \n");
+			exit(1);
 	}
 
 	/* service est le service (ou num�ro de port) auquel sera affect�
@@ -81,8 +96,52 @@ void serveur_appli(char *service)
 
 /* Procedure correspondant au traitemnt du serveur de votre application */
 {
-	char *cmd_quit = "quit";
-	int num_socket = h_socket(AF_INET,SOCK_STREAM);
+    int socket_serv = socket(AF_INET,SOCK_STREAM,0); //création de la socket
+
+    struct sockaddr_in ssin = { 0 }; /* initialise la structure avec des 0 */
+
+    const char * hostname = service;
+
+    ssin.sin_addr.s_addr = htonl(INADDR_ANY); /* nous sommes un serveur, nous acceptons n'importe quelle adresse */
+
+    ssin.sin_family = AF_INET;
+
+    ssin.sin_port = htons(PORT);
+
+    printf("Check 1");
+
+    bind (socket_serv, (struct sockaddr *) &ssin, sizeof ssin);
+
+    printf("Serveur : Bind fait");
+
+    listen(socket_serv,5);
+
+    printf("Serveur : Listen fait");
+
+    struct sockaddr_in csin = { 0 };
+    int csock;
+
+    int sinsize = sizeof csin;
+
+
+    csock = accept(socket_serv, (struct sockaddr *)&csin, &sinsize);
+
+    printf("Connexion");
+
+    char buffer[1024];
+    int n = 0;
+
+    n = recv(socket_serv, buffer, sizeof buffer - 1, 0);
+
+    buffer[n] = '\0';
+
+    printf("\n%d char reçus",n);
+
+    printf("\n\n\n%s\n\n\n",buffer);
+
+
+/*	char *cmd_quit = "quit";
+	int num_socket = _socket(AF_INET,SOCK_STREAM,0);
 	struct sockaddr_in *padr_locale;
 	adr_socket (service, NULL,SOCK_STREAM,&padr_locale);
 	h_bind(num_socket,padr_locale);
@@ -90,7 +149,7 @@ void serveur_appli(char *service)
 	int num_socket_client = h_accept(num_socket,TOUT_CLIENT);
 	printf("Connecté !\n");
 	while (1) {
-		
+
 	}
 /*	h_close(num_socket_client);
 	h_close(num_socket);*/
