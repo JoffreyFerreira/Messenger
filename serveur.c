@@ -92,69 +92,96 @@ int compare_cmd(char *cmd, char *client, int n, int *bien_place, int *mal_place)
 	return 1;
 }
 
-void serveur_appli(char *service)
+void serveur_appli(char *service) {
 
-/* Procedure correspondant au traitemnt du serveur de votre application */
-{
-    int socket_serv = socket(AF_INET,SOCK_STREAM,0); //création de la socket
+	/*Cette partie sert à initialiser la socket serveur qui va recevoir les demandes de connexion*/
 
-    struct sockaddr_in ssin = { 0 }; /* initialise la structure avec des 0 */
-
-    const char * hostname = service;
-
-    ssin.sin_addr.s_addr = htonl(INADDR_ANY); /* nous sommes un serveur, nous acceptons n'importe quelle adresse */
-
-    ssin.sin_family = AF_INET;
-
-    ssin.sin_port = htons(PORT);
-
-    printf("Check 1");
-
-    bind (socket_serv, (struct sockaddr *) &ssin, sizeof ssin);
-
-    printf("Serveur : Bind fait");
-
-    listen(socket_serv,5);
-
-    printf("Serveur : Listen fait");
-
-    struct sockaddr_in csin = { 0 };
-    int csock;
-
-    int sinsize = sizeof csin;
+	int socket_serv = socket(AF_INET, SOCK_STREAM, 0); //création de la socket
+	struct sockaddr_in ssin = {0}; /* initialise la structure avec des 0 */
+	const char *hostname = service;
+	ssin.sin_addr.s_addr = htonl(INADDR_ANY); /* nous sommes un serveur, nous acceptons n'importe quelle adresse */
+	ssin.sin_family = AF_INET;
+	ssin.sin_port = htons(PORT);
+	bind(socket_serv, (struct sockaddr *) &ssin, sizeof ssin);
+	printf("Serveur : Bind fait\n");
+	listen(socket_serv, 5);
+	printf("Serveur : Listen fait\n");
+	struct sockaddr_in csin = {0};
 
 
-    csock = accept(socket_serv, (struct sockaddr *)&csin, &sinsize);
+	int clients[5]; //Va stocker les id des sockets
 
-    printf("Connexion");
+	int nb_clients = 0;
+
+	int sock_max = socket_serv;
 
     char buffer[1024];
-    int n = 0;
 
-    n = recv(socket_serv, buffer, sizeof buffer - 1, 0);
+	fd_set readfs;
 
-    buffer[n] = '\0';
-
-    printf("\n%d char reçus",n);
-
-    printf("\n\n\n%s\n\n\n",buffer);
-
-
-/*	char *cmd_quit = "quit";
-	int num_socket = _socket(AF_INET,SOCK_STREAM,0);
-	struct sockaddr_in *padr_locale;
-	adr_socket (service, NULL,SOCK_STREAM,&padr_locale);
-	h_bind(num_socket,padr_locale);
-	h_listen(num_socket,1);
-	int num_socket_client = h_accept(num_socket,TOUT_CLIENT);
-	printf("Connecté !\n");
 	while (1) {
+		FD_ZERO(&readfs);
+		FD_SET(STDIN_FILENO, &readfs);
+		FD_SET(socket_serv, &readfs);
 
+		for(int i=0;i<nb_clients;i++){
+			FD_SET(clients[i],&readfs);
+		}
+
+		select(socket_serv+1, &readfs, NULL, NULL, NULL);
+
+		if(FD_ISSET(STDIN_FILENO, &readfs))
+		{
+			//lecture_clavier();
+		}
+
+		else if(FD_ISSET(socket_serv,&readfs)){
+			int nv_client;
+			int sinsize = sizeof csin;
+
+			nv_client = accept(socket_serv, (struct sockaddr *) &csin, &sinsize);
+
+			printf("Nouvelle connexion détéctée\n");
+
+            int n =recv(nv_client, buffer, sizeof buffer - 1, 0);
+
+            if(n == -1){
+				continue;
+			}
+
+			FD_SET(nv_client,&readfs);
+
+			if(nv_client>sock_max){
+				sock_max = nv_client;
+			}
+
+            printf("id socket : %d",nv_client);
+
+		}
+
+        else{
+            for(int i=0;i<5;i++){
+                if(FD_ISSET(clients[i],&readfs)){
+                    int n = recv(clients[i], buffer, sizeof buffer - 1, 0);
+                    buffer[n] = '\0';
+                    if(n == 0){
+                        close(clients[i]);
+                        memmove(clients + i, clients + i + 1, (nb_clients - i - 1) * sizeof(int));
+                        nb_clients--;
+                    }
+                    else{
+
+                        for(int j = 0; j < nb_clients; j++)
+                        {
+                            if(clients[i] != clients[j])
+                            {
+                                write(clients[i], buffer, n);
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+        }
 	}
-/*	h_close(num_socket_client);
-	h_close(num_socket);*/
 }
-
-/* fin des echanges avec le client */
-
-/******************************************************************************/

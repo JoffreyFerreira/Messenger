@@ -82,35 +82,40 @@ void client_appli (char* serveur, char* service)
 
 	struct sockaddr_in ssin = { 0 }; /* initialise la structure avec des 0 */
 
-	//&ssin = malloc(sizeof(struct sockaddr_in));
-
-	//ssin.sin_addr = * (struct in_addr *) hostinfo->h_addr; /* l'adresse se trouve dans le champ h_addr de la structure hostinfo */
-
     ssin.sin_addr = *(struct in_addr *) hostinfo->h_addr; /* l'adresse se trouve dans le champ h_addr de la structure hostinfo */
-
 	ssin.sin_port = htons(PORT); /* on utilise htons pour le port */
 	ssin.sin_family = AF_INET;
 
-	printf("Prêt à se connecter");
+	printf("Prêt à se connecter\n");
 
 	connect(socketClient,(struct sockaddr *) &ssin, sizeof(struct sockaddr));
 
-	printf("Connexion : succès");
+	printf("Connexion : succès\n");
 
+	printf("Veuillez rentrer votre pseudo :");
 
-	char buffer = 'l';
+	char buffer[25] = "";
 
-	send(socketClient, &buffer, 1, 0);
+    fgets(buffer, sizeof(chaine), stdin);
+    clean(chaine, stdin);
 
-    /*
-	int num_socket = h_socket(AF_INET,SOCK_STREAM);
-	struct sockaddr_in *padr_distante;
-	adr_socket (service,serveur,SOCK_STREAM,&padr_distante);
-	h_connect(num_socket,padr_distante);
-	printf("Connecté !\n");
-	int gagne=0;
-	while (gagne!=1) {
+    fd_set rdfs;
+
+	while(1){
+        FD_ZERO(&rdfs);
+    }
+
 }
-*/
+
+void clean(const char *buffer, FILE *fp)
+{
+    char *p = strchr(buffer,'\n');
+    if (p != NULL)
+        *p = 0;
+    else
+    {
+        int c;
+        while ((c = fgetc(fp)) != '\n' && c != EOF);
+    }
 }
 /*****************************************************************************/
