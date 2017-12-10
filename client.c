@@ -72,6 +72,18 @@ int main(int argc, char *argv[])
 	client_appli(serveur,service);
 }
 
+void clean(const char *buffer, FILE *fp)
+{
+    char *p = strchr(buffer,'\n');
+    if (p != NULL)
+        *p = 0;
+    else
+    {
+        int c;
+        while ((c = fgetc(fp)) != '\n' && c != EOF);
+    }
+}
+
 /*****************************************************************************/
 void client_appli (char* serveur, char* service)
 /* procedure correspondant au traitement du client de votre application */
@@ -92,30 +104,54 @@ void client_appli (char* serveur, char* service)
 
 	printf("Connexion : succès\n");
 
-	printf("Veuillez rentrer votre pseudo :");
+	/*printf("Veuillez rentrer votre pseudo :");
 
 	char buffer[25] = "";
 
-    fgets(buffer, sizeof(chaine), stdin);
-    clean(chaine, stdin);
+    fgets(buffer, sizeof(buffer), stdin);
+    clean(buffer, stdin);
+
+    send(socketClient,buffer, sizeof buffer - 1,0);*/
 
     fd_set rdfs;
 
 	while(1){
         FD_ZERO(&rdfs);
+
+        FD_SET(STDIN_FILENO,&rdfs);
+
+        FD_SET(socketClient,&rdfs);
+
+        select(socketClient+1,&rdfs,NULL,NULL,NULL);
+
+        if(FD_ISSET(STDIN_FILENO,&rdfs)){
+
+            char buffer[1024] = "";
+
+            fgets(buffer, sizeof(buffer), stdin);
+            clean(buffer, stdin);
+
+            send(socketClient, buffer, strlen(buffer), 0);
+
+        }
+
+        else if(FD_ISSET(socketClient,&rdfs)){
+
+            char buffer[1024];
+            int n = recv(socketClient, buffer, 1023, 0);
+            buffer[n] = '\0';
+
+            if(n == 0){
+                printf("Serveur déconnecté\n");
+                break;
+            }
+
+            printf("%s\n",buffer);
+        }
+
     }
 
-}
+    close(socketClient);
 
-void clean(const char *buffer, FILE *fp)
-{
-    char *p = strchr(buffer,'\n');
-    if (p != NULL)
-        *p = 0;
-    else
-    {
-        int c;
-        while ((c = fgetc(fp)) != '\n' && c != EOF);
-    }
 }
 /*****************************************************************************/

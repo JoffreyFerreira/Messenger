@@ -136,6 +136,7 @@ void serveur_appli(char *service) {
 		}
 
 		else if(FD_ISSET(socket_serv,&readfs)){
+
 			int nv_client;
 			int sinsize = sizeof csin;
 
@@ -143,11 +144,13 @@ void serveur_appli(char *service) {
 
 			printf("Nouvelle connexion détéctée\n");
 
-            int n =recv(nv_client, buffer, sizeof buffer - 1, 0);
+            //int n = recv(nv_client, buffer, sizeof buffer - 1, 0);
 
-            if(n == -1){
+            printf("Reçu");
+
+            /*if(n == -1){
 				continue;
-			}
+			}*/
 
 			FD_SET(nv_client,&readfs);
 
