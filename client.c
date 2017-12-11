@@ -113,6 +113,8 @@ void client_appli (char* serveur, char* service)
 
     send(socketClient,buffer, sizeof buffer - 1,0);*/
 
+    char buffer[1024];
+
     fd_set rdfs;
 
 	while(1){
@@ -126,32 +128,43 @@ void client_appli (char* serveur, char* service)
 
         if(FD_ISSET(STDIN_FILENO,&rdfs)){
 
-            char buffer[1024] = "";
-
-            fgets(buffer, sizeof(buffer), stdin);
-            clean(buffer, stdin);
+            fgets(buffer, 1023, stdin);
+            {
+                char *p = NULL;
+                p = strstr(buffer, "\n");
+                if(p != NULL)
+                {
+                    *p = 0;
+                }
+                else
+                {
+                    buffer[1023] = 0;
+                }
+            }
 
             send(socketClient, buffer, strlen(buffer), 0);
+
+            printf("Message sent\n");
 
         }
 
         else if(FD_ISSET(socketClient,&rdfs)){
-
+            printf("Nouveau message\n");
             char buffer[1024];
             int n = recv(socketClient, buffer, 1023, 0);
             buffer[n] = '\0';
 
             if(n == 0){
                 printf("Serveur déconnecté\n");
+                close(socketClient);
+                FD_ZERO(&rdfs);
                 break;
             }
 
-            printf("%s\n",buffer);
+            //printf("%s\n",buffer);
         }
 
     }
-
-    close(socketClient);
 
 }
 /*****************************************************************************/

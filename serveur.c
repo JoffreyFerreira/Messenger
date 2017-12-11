@@ -136,7 +136,7 @@ void serveur_appli(char *service) {
 		}
 
 		else if(FD_ISSET(socket_serv,&readfs)){
-
+            printf("cond1\n");
 			int nv_client;
 			int sinsize = sizeof csin;
 
@@ -146,7 +146,7 @@ void serveur_appli(char *service) {
 
             //int n = recv(nv_client, buffer, sizeof buffer - 1, 0);
 
-            printf("Reçu");
+            printf("Reçu\n");
 
             /*if(n == -1){
 				continue;
@@ -158,13 +158,14 @@ void serveur_appli(char *service) {
 				sock_max = nv_client;
 			}
 
-            printf("id socket : %d",nv_client);
+            printf("id socket : %d\n",nv_client);
 
 		}
 
         else{
             for(int i=0;i<5;i++){
                 if(FD_ISSET(clients[i],&readfs)){
+                    printf("Message reçu, socket %d\n",clients[i]);
                     int n = recv(clients[i], buffer, sizeof buffer - 1, 0);
                     buffer[n] = '\0';
                     if(n == 0){
@@ -174,8 +175,7 @@ void serveur_appli(char *service) {
                     }
                     else{
 
-                        for(int j = 0; j < nb_clients; j++)
-                        {
+                        for(int j = 0; j < nb_clients; j++){
                             if(clients[i] != clients[j])
                             {
                                 write(clients[i], buffer, n);
@@ -187,4 +187,9 @@ void serveur_appli(char *service) {
             }
         }
 	}
+
+    for(int i=0;i<nb_clients;i++){
+        close(clients[i]);
+    }
+    close(socket_serv);
 }
